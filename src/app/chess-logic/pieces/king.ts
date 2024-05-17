@@ -2,6 +2,8 @@ import { Color, Coords, FENChar } from "../models";
 import { Piece } from "./piece";
 
 export class King extends Piece {
+  private _hasMoved: boolean = false;
+  private _hasChecked: boolean = false;
   protected override _FENChar: FENChar;
   protected override _directions: Coords[] = [
     {x: 1, y: 1},
@@ -18,4 +20,20 @@ export class King extends Piece {
     super(pieceColor);
     this._FENChar = pieceColor === Color.White ? FENChar.WhiteKing : FENChar.BlackKing;
   } 
+
+  public get hasMoved(): boolean {
+    return this._hasMoved;
+  }
+
+  public set hasMoved(_) {
+    this._hasMoved = true;
+  }
+
+  public get hasChecked(): boolean {
+    return this._hasChecked;
+  }
+
+  public set hasChecked(_) {
+    this._hasMoved = true;
+  }
 }
