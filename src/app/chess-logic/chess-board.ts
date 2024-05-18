@@ -8,6 +8,7 @@ import { Queen } from "./pieces/queen";
 import { Rook } from "./pieces/rook";
 
 export class ChessBoard {
+  private chessBoardSize: number = 8;
   private chessBoard: (Piece|null) [][];
   private _playerColor = Color.White;
 
@@ -48,4 +49,62 @@ export class ChessBoard {
   public static isSquareDark(x: number, y: number): boolean {
     return x % 2 === 0 && y % 2 === 0 || x % 2 === 1 && y % 2 === 1;
   }
-}
+
+  private areCoordsValid(x: number, y: number): boolean {
+    return x >= 0 && y >= 0 && x < this.chessBoardSize && y < this.chessBoardSize;
+  }
+
+  public isChecked(playerColor: Color): boolean {{
+    for (let x = 0; x < this.chessBoardSize; x++) {
+      for (let y = 0; y < this.chessBoardSize; y) {
+        const piece : Piece | null = this.chessBoard[x][y];
+        if(!piece || piece.color === playerColor) continue;
+
+        for (const {x: dx, y: dy} of piece.directions) {
+          let newX: number = x + dx;
+          let newY: number = y + dy;
+
+          if (!this.areCoordsValid(newX, newY)) continue;
+
+          if (piece instanceof Pawn || piece instanceof King || piece instanceof Knight) {
+            // Пешка атакует только по диагонали
+            if (piece instanceof Pawn && dy === 0) continue;
+
+            const attackedPiece: Piece | null = this.chessBoard[newX][newY];
+            if (attackedPiece instanceof King && attackedPiece.color === playerColor) return true;
+          }
+          else {
+            while (this.areCoordsValid(newX, newY)) {
+              const attackedPiece: Piece | null = this.chessBoard[newX][newY];
+              if (attackedPiece instanceof King && attackedPiece.color === playerColor) return true;
+
+              if(attackedPiece !== null) break;
+
+              newX += dx;
+              newY += dy;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }}
+
+  private isPositionIsSafeAfterMove(piece: Piece, prevX: number, prevY: number, newX: number, newY: number): boolean {
+    const newPiece: Piece | null = this.chessBoard[newX][newY];
+
+    if (newPiece && newPiece.color === piece.color) return false;
+
+    this.chessBoard[prevX][prevY] = null;
+    this.chessBoard[newX][newY] = piece;
+
+    const isPositionSafe: boolean = !this.isChecked(piece.color);
+
+    this.chessBoard[prevX][newY] = piece;
+    this.chessBoard[newX][newY] = newPiece;
+
+    return isPositionSafe;
+  }
+
+  
+};
